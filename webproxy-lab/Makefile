@@ -8,7 +8,12 @@ CC = gcc
 CFLAGS = -g -Wall
 LDFLAGS = -lpthread
 
-all: echoserver
+.PHONY: all tiny clean
+
+all: tiny
+
+tiny:
+	$(MAKE) -C tiny tiny
 
 csapp.o: csapp.c csapp.h
 	$(CC) $(CFLAGS) -c csapp.c
@@ -32,3 +37,4 @@ handin:
 
 clean:
 	rm -f *~ *.o proxy echoserver core *.tar *.zip *.gzip *.bzip *.gz
+	$(MAKE) -C tiny clean

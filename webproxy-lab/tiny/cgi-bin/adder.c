@@ -14,11 +14,16 @@ int main(void)
   if ((buf = getenv("QUERY_STRING")) != NULL)
   {
     p = strchr(buf, '&');
-    *p = '\0';
-    strcpy(arg1, buf);
-    strcpy(arg2, p + 1);
-    n1 = atoi(strchr(arg1, '=') + 1);
-    n2 = atoi(strchr(arg2, '=') + 1);
+    if (p != NULL)
+    {
+      *p = '\0';
+      strcpy(arg1, buf);
+      strcpy(arg2, p + 1);
+
+      /* Support both "15000&213" and "a=15000&b=213" forms. */
+      n1 = strchr(arg1, '=') ? atoi(strchr(arg1, '=') + 1) : atoi(arg1);
+      n2 = strchr(arg2, '=') ? atoi(strchr(arg2, '=') + 1) : atoi(arg2);
+    }
   }
 
   /* Make the response body */

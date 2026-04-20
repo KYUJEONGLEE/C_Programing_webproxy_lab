@@ -281,12 +281,34 @@ void serve_dynamic(int fd, char *filename, char *cgiargs)
   */
   if (Fork() == 0)
   {
+    setenv("QUERY_STRING", cgiargs, 1); // CGI 인자를 환경 변수로 설정한다.
+    Dup2(fd, STDOUT_FILENO);            // 표준 출력을 클라이언트 소켓(브라우저)로 바꾼다.
+    Execve(filename, emptylist, environ);
     /*
-
+      원래 Tiny server의 자식 프로세스였지만, Execve() 후에는 해당 프로그램이 된다.
+      execve()는 새 프로세스를 만드는게 아니라, 현재 프로세스 이미지를 새 프로그램으로 교치한다.
+      즉, 여기서는 이 자식 프로세스는 CGI 코드(adder.c)를 실행하게 된다.
+      위에서 설정한 dup2 덕분에 그 출력이 클라이언트로 가게됨.
     */
-    setenv("QUERY_STRING", cgiargs, 1);
-    Dup2(fd, STDOUT_FILENO);              /* Redirect stdout to client */
-    Execve(filename, emptylist, environ); /* Run CGI program */
   }
   Wait(NULL); /* Parent waits for and reaps child */
+  /*
+    기다리는 이유
+    - 자식이 동적 콘텐츠를 생성중인데, 부모가 너무 빨리 정리하거나 연결을 닫아버리면 안되기 때문
+    - 좀비 프로세스 방지
+  */
+}
+
+void get_filetype(char *filename, char *filetype)
+{
+  if (strstr(filename, ".html"))
+    strcpy(filetype, "text/html");
+  else if (strstr(filename, ".gif"))
+    strcpy(filetype, "image/gif");
+  else if (strstr(filename, ".png"))
+    strcpy(filetype, "image/png");
+  else if (strstr(filename, ".jpg"))
+    strcpy(filetype, "image/jpeg");
+  else
+    strcpy(filetype, "text/plain");
 }

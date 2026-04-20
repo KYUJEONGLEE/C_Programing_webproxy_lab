@@ -126,3 +126,23 @@ void doit(int fd)
     serve_dynamic(fd, filename, cgiargs);
   }
 }
+
+// Header를 읽는 함수
+void read_requesthdrs(rio_t *rp)
+{
+  char buf[MAXLINE];
+  // 개행문자를 기준으로 한줄씩 읽어 buf에 넣는다.
+  Rio_readlineb(rp, buf, MAXLINE);
+  // 빈 줄이 나올때까지 반복한다 -> Header의 끝은 빈 줄
+  while (strcmp(buf, "\r\n"))
+  {
+    Rio_readlineb(rp, buf, MAXLINE);
+    printf("%s", buf);
+  }
+  return;
+}
+
+void clienterror(int fd, char *cause, char *errnum, char *shortmsg,
+                 char *longmsg)
+{
+}

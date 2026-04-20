@@ -7,7 +7,7 @@
             "command": "cd ${workspaceFolder}/webproxy-lab/tiny && make",
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             },
             "presentation": {
                 "reveal": "always",
@@ -56,7 +56,7 @@
             "command": "cd ${workspaceFolder}/webproxy-lab && make",
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             },
             "presentation": {
                 "reveal": "always",
@@ -93,6 +93,51 @@
                 "kind": "build",
                 "isDefault": false
             },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Echo server build",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/webproxy-lab && make echoserver",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/webproxy-lab"
+            }
+        },
+        {
+            "label": "Echo server clean",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/webproxy-lab && make clean",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/webproxy-lab"
+            }
+        },
+        {
+            "label": "Echo server clean-and-build",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Echo server clean",
+                "Echo server build"
+            ],
             "presentation": {
                 "reveal": "always",
                 "panel": "new"

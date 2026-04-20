@@ -9,13 +9,17 @@ int main(int argc, char **argv)
     struct sockaddr_storage clientaddr;
     char client_hostname[MAXLINE], client_port[MAXLINE];
 
+    // ip랑 port 번호 이렇게 2개가 들어와야하는데 더 많이 들어온경우.
     if (argc != 2)
     {
         fprintf(stderr, "usage: %s <port>", argv[0]);
         exit(0);
     }
 
+    // 듣기 소켓을 생성해준다.
     listenfd = Open_listenfd(argv[1]);
+
+    // 요청이 오길 기다린다.
     while (1)
     {
         clientlen = sizeof(struct sockaddr_storage);

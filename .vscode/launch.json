@@ -2,6 +2,37 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug Echo Server",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/webproxy-lab/echoserver",
+            "args": [
+                "4500"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/webproxy-lab",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "preLaunchTask": "Echo server clean-and-build",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "sourceFileMap": {
+                "/workspaces/webproxy_lab_docker": "${workspaceFolder}"
+            }
+        },
+        {
             "name": "Debug Tiny Web Server",
             "type": "cppdbg",
             "request": "launch",

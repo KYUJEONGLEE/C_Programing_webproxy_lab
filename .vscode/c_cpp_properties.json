@@ -1,0 +1,21 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "Linux",
+            "compilerPath": "/usr/bin/gcc",
+            "intelliSenseMode": "linux-gcc-x64",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/webproxy-lab",
+                "${workspaceFolder}/webproxy-lab/tiny"
+            ],
+            "defines": [
+                "_DEFAULT_SOURCE",
+                "_POSIX_C_SOURCE=200809L"
+            ]
+        }
+    ]
+}

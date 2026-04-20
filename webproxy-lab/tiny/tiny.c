@@ -218,29 +218,75 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
 // static 요청 처리 함수
 void serve_static(int fd, char *filename, int filesize)
 {
-  int srcfd;
+  int srcfd; // 보낼 파일을 연 파일 fd
   char *srcp, filetype[MAXLINE], buf[MAXBUF];
-
-  /* Send response headers to client */
-  get_filetype(filename, filetype);
+  /*
+    srcp = mmap으로 파일을 메모리에 매핑한 시작 주소
+    filetype = MIME 타입 저장용
+    buf = HTTP 응답 헤더 문자열을 만들어 담는 버퍼
+  */
+  /*
+    응답 헤더를 만든다.
+  */
+  get_filetype(filename, filetype); // 파일 타입을 결정하고 filetype에 넣는다.
+  /*
+    buf에 HTTP 응답 메시지의 헤더부분을 붙이는 과정
+  */
   sprintf(buf, "HTTP/1.0 200 OK\r\n");
   sprintf(buf, "%sServer: Tiny Web Server\r\n", buf);
   sprintf(buf, "%sConnection: close\r\n", buf);
   sprintf(buf, "%sContent-length: %d\r\n", buf, filesize);
   sprintf(buf, "%sContent-type: %s\r\n\r\n", buf, filetype);
+
+  // 여기서 인자로 받는 fd는 클라이언트와 연결된 소켓 fd
+  // 즉, 위에서 만든 HTTP 응답 헤더를 브라우저에게 보낸다.
   Rio_writen(fd, buf, strlen(buf));
+
+  // 서버 터미널에 출력
   printf("Response headers:\n");
   printf("%s", buf);
 
-  /* Send response body to client */
-  srcfd = Open(filename, O_RDONLY, 0);
+  /* 파일 내용을 실제로 보낸다 */
+  srcfd = Open(filename, O_RDONLY, 0); // 진짜 보낼 파일을 연다(읽기 전용)
+  /*
+    파일 내용을 read로 따로 읽어와서 버퍼에 넣는 대신, 파일을 메모리 처럼 바로 다루게 하는것.
+    즉, 파일 내용이 있는 곳을 메모리 주소 srcp 로 가리키게 만든다.
+  */
   srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
   Close(srcfd);
+
+  // 여기서 파일 내용을 통째로 브라우저에게 보낸다.
   Rio_writen(fd, srcp, filesize);
+  // 메모리 매핑을 해제한다.
   Munmap(srcp, filesize);
 }
 
 // dynamic 요청 처리 함수
 void serve_dynamic(int fd, char *filename, char *cgiargs)
 {
+  // emptylist = Execve()에 넘길 argv 배열
+  char buf[MAXLINE], *emptylist[] = {NULL};
+  /*
+    서버가 브라우저에게 먼저 전달하는 요소 2개
+    요청 성공적으로 처리했다는 메시지 + 서버 이름
+  */
+  sprintf(buf, "HTTP/1.0 200 OK\r\n");
+  Rio_writen(fd, buf, strlen(buf));
+  sprintf(buf, "Server: Tiny Web Server\r\n");
+  Rio_writen(fd, buf, strlen(buf));
+
+  /*
+    Fork()로 자식 프로세스 생성.
+    자식이면 == 0
+  */
+  if (Fork() == 0)
+  {
+    /*
+
+    */
+    setenv("QUERY_STRING", cgiargs, 1);
+    Dup2(fd, STDOUT_FILENO);              /* Redirect stdout to client */
+    Execve(filename, emptylist, environ); /* Run CGI program */
+  }
+  Wait(NULL); /* Parent waits for and reaps child */
 }

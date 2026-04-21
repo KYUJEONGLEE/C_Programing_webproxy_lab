@@ -252,13 +252,17 @@ void serve_static(int fd, char *filename, int filesize)
     파일 내용을 read로 따로 읽어와서 버퍼에 넣는 대신, 파일을 메모리 처럼 바로 다루게 하는것.
     즉, 파일 내용이 있는 곳을 메모리 주소 srcp 로 가리키게 만든다.
   */
-  srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
-  Close(srcfd);
+
+  // 기존의 mmap 방식을 malloc으로 바꿈
+  char *mbuf = malloc(filesize);
+  // srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
+  // Close(srcfd);
+  Rio_readn(srcfd, mbuf, filesize);
 
   // 여기서 파일 내용을 통째로 브라우저에게 보낸다.
-  Rio_writen(fd, srcp, filesize);
-  // 메모리 매핑을 해제한다.
-  Munmap(srcp, filesize);
+  Rio_writen(fd, mbuf, filesize);
+  Close(srcfd);
+  free(mbuf);
 }
 
 // dynamic 요청 처리 함수
@@ -309,6 +313,8 @@ void get_filetype(char *filename, char *filetype)
     strcpy(filetype, "image/png");
   else if (strstr(filename, ".jpg"))
     strcpy(filetype, "image/jpeg");
+  else if (strstr(filename, ".mpg"))
+    strcpy(filetype, "video/mpeg");
   else
     strcpy(filetype, "text/plain");
 }
